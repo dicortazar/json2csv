@@ -23,8 +23,28 @@ import csv
 import json
 import sys
 
+
+"""The following global variables assume the following JSON
+structure coming from ElasticSearch:
+{
+    "<index_name>": {
+        "mappings": {
+            "items": {
+                ...,
+                "properties":{
+                    ....
+                }
+            }
+        }
+    }
+}
+"""
+
+MAPPINGS = "mappings"
+ITEMS = "items"
 PROPERTIES = "properties"
 TYPE = "type"
+
 
 COLUMN_NAME = "name"
 COLUMN_TYPE = "type"
@@ -59,10 +79,14 @@ def json2tuple(filepath):
     """
 
     json_data = open(filepath).read()
-    data = json.loads(json_data)
+    full_mapping = json.loads(json_data)
+
+    # Look for the 'properties' key
+    index_name = list(full_mapping.keys())[0]
+    properties_mapping = full_mapping[index_name][MAPPINGS][ITEMS]
 
     csv_trans = []
-    for key, val in data[PROPERTIES].items():
+    for key, val in properties_mapping[PROPERTIES].items():
         csv_trans.append((key, val[TYPE]))
 
     return csv_trans
